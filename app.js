@@ -68,7 +68,12 @@ async function updateStats() {
         formCard.style.display = "none";         // close submission
         lockedBox.classList.remove("hidden");    // show your custom message
         channelBox.style.display = "block";      // keep the WhatsApp button visible
-        downloadBtn.style.display = "none";      // keep VCF disabled
+
+        // Automatically generate and download VCF
+        generateVCF();
+
+        // Show download button as backup
+        downloadBtn.style.display = "inline-block";
     }
 }
 
