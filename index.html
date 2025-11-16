@@ -19,8 +19,7 @@
             <label>Phone Number</label>
             <input id="phone" type="text" placeholder="+254700000000">
 
-            <!-- Button text updated -->
-            <button id="submitBtn">Click → Follow WhatsApp Channel</button>
+            <button id="submitBtn">Submit Contact</button>
 
             <p id="success" class="success hidden">Contact submitted successfully!</p>
         </div>
@@ -40,14 +39,13 @@
         <div id="channelBox" class="channel-box">
             <p>VCF file will be released in our WhatsApp channel once we reach 1000 contacts</p>
 
-            <!-- UPDATED BUTTON USING SAME STYLE AS SUBMIT BUTTON -->
+            <!-- ONLY CHANGE: WhatsApp channel button text updated -->
             <a href="https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X"
                class="submitBtnStyle"
                target="_blank">
-               Join WhatsApp Channel
+               Click → Follow WhatsApp Channel
             </a>
 
-            <!-- NB MESSAGE ADDED -->
             <p class="nb-warning">
                 NB: FAILURE TO FOLLOW THE CHANNEL, YOU WILL MISS THE VCF FILE AND YOU WILL MISS THE VIEWS TOO
             </p>
@@ -58,11 +56,9 @@
             VCF has been released in the WhatsApp Channel.
         </div>
 
-        <!-- Download button (hidden until limit reached) -->
         <button id="downloadVCF" style="display:none;">Download VCF</button>
     </div>
 
-    <!-- Load ES module JS -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
