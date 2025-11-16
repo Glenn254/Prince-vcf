@@ -1,6 +1,6 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -33,7 +33,25 @@ const formCard = document.querySelector(".form-card");
 const downloadBtn = document.getElementById("downloadVCF");
 const channelBox = document.getElementById("channelBox");
 
-// Helper function to update stats dynamically
+// NEW
+const alreadySubmittedMsg = document.getElementById("alreadySubmitted");
+
+// NEW — prevent double submission
+function checkSubmissionLock() {
+    if (localStorage.getItem("submitted_once") === "yes") {
+        submitBtn.disabled = true;
+        nameInput.disabled = true;
+        phoneInput.disabled = true;
+        if (alreadySubmittedMsg) {
+            alreadySubmittedMsg.classList.remove("hidden");
+        }
+    }
+}
+
+// Run on load
+checkSubmissionLock();
+
+// Update stats
 async function updateStats() {
     const snapshot = await getDocs(collection(db, "contacts"));
     const total = snapshot.size;
@@ -45,19 +63,19 @@ async function updateStats() {
     percentElem.textContent = percent + "%";
     progressFill.style.width = percent + "%";
 
-    // Unlock VCF if target reached
+    // When target reached
     if (total >= TARGET) {
-        formCard.style.display = "none";
-        lockedBox.classList.remove("hidden");
-        downloadBtn.style.display = "block";
-        channelBox.style.display = "none";
+        formCard.style.display = "none";         // close submission
+        lockedBox.classList.remove("hidden");    // show your custom message
+        channelBox.style.display = "block";      // keep the WhatsApp button visible
+        downloadBtn.style.display = "none";      // keep VCF disabled
     }
 }
 
-// Initial stats update
+// Run stats
 updateStats();
 
-// Handle contact submission
+// Submit contact
 submitBtn.addEventListener("click", async () => {
     const name = nameInput.value.trim();
     const phone = phoneInput.value.trim();
@@ -68,10 +86,13 @@ submitBtn.addEventListener("click", async () => {
     }
 
     try {
-        // Add contact to Firestore
         await addDoc(collection(db, "contacts"), { name, phone, time: Date.now() });
 
-        // Show success message
+        // NEW — lock further submissions
+        localStorage.setItem("submitted_once", "yes");
+        checkSubmissionLock();
+
+        // normal success flow
         successMsg.textContent = "Contact submitted successfully!";
         successMsg.classList.remove("hidden");
         nameInput.value = "";
@@ -79,7 +100,6 @@ submitBtn.addEventListener("click", async () => {
 
         setTimeout(() => successMsg.classList.add("hidden"), 2000);
 
-        // Update stats after submission
         updateStats();
     } catch (error) {
         console.error("Error adding contact:", error);
@@ -87,7 +107,7 @@ submitBtn.addEventListener("click", async () => {
     }
 });
 
-// Generate VCF with latest contacts
+// VCF generator (button hidden anyway)
 async function generateVCF() {
     const snapshot = await getDocs(collection(db, "contacts"));
     let vcf = "";
@@ -111,5 +131,4 @@ END:VCARD
     a.click();
 }
 
-// Handle VCF download
 downloadBtn.addEventListener("click", generateVCF);
