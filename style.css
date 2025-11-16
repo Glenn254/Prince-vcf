@@ -1,5 +1,79 @@
-/* Make Join WhatsApp Channel button match the Submit button */
-.submitBtnStyle {
+/* Reset some basic styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #6a0dad, #b122ff);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
+
+.container {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+}
+
+.title {
+    font-size: 2.2rem;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #ffde59;
+}
+
+.subtitle {
+    font-size: 1rem;
+    margin-bottom: 25px;
+    color: #e0cfff;
+}
+
+.form-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-card label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.form-card input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 8px;
+    outline: none;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 1rem;
+    transition: background 0.3s;
+}
+
+.form-card input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.form-card input:focus {
+    background: rgba(255,255,255,0.3);
+}
+
+button {
     padding: 12px 20px;
     background: #ffde59;
     border: none;
@@ -10,22 +84,96 @@
     cursor: pointer;
     transition: all 0.3s;
     width: 100%;
-    display: block;
-    text-align: center;
-    text-decoration: none;
-    margin-top: 10px;
 }
 
-.submitBtnStyle:hover {
+button:hover {
     background: #e6c84c;
     transform: translateY(-2px);
 }
 
-/* NB Warning Text */
-.nb-warning {
-    margin-top: 8px;
-    color: #ffeb3b;
-    font-size: 0.85rem;
+.success {
+    color: #00ffcc;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.hidden {
+    display: none;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+}
+
+.stat {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 15px;
+    border-radius: 10px;
+}
+
+.stat span {
+    font-size: 1.2rem;
     font-weight: bold;
-    text-align: center;
+}
+
+.progress-bar {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    height: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+#progressFill {
+    height: 100%;
+    width: 0;
+    background: #ffde59;
+    border-radius: 10px 0 0 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.channel-box {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.channel-box a {
+    color: #ffde59;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.channel-box a:hover {
+    text-decoration: underline;
+}
+
+.locked {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: bold;
+    color: #00ffcc;
+    margin-bottom: 15px;
+}
+
+#downloadVCF {
+    background: #00ffcc;
+    color: #6a0dad;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+#downloadVCF:hover {
+    background: #00e6b8;
+    transform: translateY(-2px);
 }
