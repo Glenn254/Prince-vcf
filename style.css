@@ -177,3 +177,26 @@ button:hover {
     background: #00e6b8;
     transform: translateY(-2px);
 }
+
+/* ====== Added CSS to make WhatsApp button match submit button ====== */
+.submitBtnStyle {
+    display: inline-block;
+    width: 100%;
+    padding: 12px 20px;
+    background: #ffde59; /* same as submit button */
+    border: none;
+    border-radius: 10px;
+    color: #6a0dad;
+    font-weight: bold;
+    font-size: 1rem;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+
+.submitBtnStyle:hover {
+    background: #e6c84c;
+    transform: translateY(-2px);
+}
