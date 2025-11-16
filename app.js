@@ -1,13 +1,13 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Firebase config
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDQPWXo0PxlH-ASXsO6WZtEGJ4dv_rbkkY",
   authDomain: "princev-vcf.firebaseapp.com",
   projectId: "princev-vcf",
-  storageBucket: "princev-vcf.firebasestorage.app",
+  storageBucket: "princev-vcf.appspot.com",
   messagingSenderId: "930544921320",
   appId: "1:930544921320:web:13df28cee6f0e9cc96b75d"
 };
@@ -16,102 +16,100 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Maximum contacts before VCF generation
+// Target contacts for unlocking VCF
 const TARGET = 1000;
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const submitBtn = document.getElementById("submitBtn");
-  const nameInput = document.getElementById("name");
-  const phoneInput = document.getElementById("phone");
-  const successMsg = document.getElementById("success");
-  const currentElem = document.getElementById("current");
-  const remainingElem = document.getElementById("remaining");
-  const percentElem = document.getElementById("percent");
-  const progressFill = document.getElementById("progressFill");
-  const lockedBox = document.getElementById("locked");
-  const formCard = document.querySelector(".form-card");
-  const downloadBtn = document.getElementById("downloadVCF");
-  const channelBox = document.getElementById("channelBox");
+// DOM elements
+const submitBtn = document.getElementById("submitBtn");
+const nameInput = document.getElementById("name");
+const phoneInput = document.getElementById("phone");
+const successMsg = document.getElementById("success");
+const currentElem = document.getElementById("current");
+const remainingElem = document.getElementById("remaining");
+const percentElem = document.getElementById("percent");
+const progressFill = document.getElementById("progressFill");
+const lockedBox = document.getElementById("locked");
+const formCard = document.querySelector(".form-card");
+const downloadBtn = document.getElementById("downloadVCF");
+const channelBox = document.getElementById("channelBox");
 
-  // Load initial contacts count
-  let snapshot = await getDocs(collection(db, "contacts"));
-  updateProgress(snapshot.size);
+// Helper function to update stats dynamically
+async function updateStats() {
+    const snapshot = await getDocs(collection(db, "contacts"));
+    const total = snapshot.size;
 
-  submitBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
+    currentElem.textContent = total;
+    remainingElem.textContent = Math.max(TARGET - total, 0);
 
+    const percent = Math.min(Math.floor((total / TARGET) * 100), 100);
+    percentElem.textContent = percent + "%";
+    progressFill.style.width = percent + "%";
+
+    // Unlock VCF if target reached
+    if (total >= TARGET) {
+        formCard.style.display = "none";
+        lockedBox.classList.remove("hidden");
+        downloadBtn.style.display = "block";
+        channelBox.style.display = "none";
+    }
+}
+
+// Initial stats update
+updateStats();
+
+// Handle contact submission
+submitBtn.addEventListener("click", async () => {
     const name = nameInput.value.trim();
     const phone = phoneInput.value.trim();
 
     if (!name || !phone) {
-      successMsg.textContent = "Please fill in both fields!";
-      successMsg.classList.remove("hidden");
-      return;
+        alert("Please fill in both fields");
+        return;
     }
 
     try {
-      // Save to Firestore
-      await addDoc(collection(db, "contacts"), { name, phone });
+        // Add contact to Firestore
+        await addDoc(collection(db, "contacts"), { name, phone, time: Date.now() });
 
-      successMsg.textContent = "Contact submitted successfully!";
-      successMsg.classList.remove("hidden");
-      nameInput.value = "";
-      phoneInput.value = "";
+        // Show success message
+        successMsg.textContent = "Contact submitted successfully!";
+        successMsg.classList.remove("hidden");
+        nameInput.value = "";
+        phoneInput.value = "";
 
-      // Update progress
-      snapshot = await getDocs(collection(db, "contacts"));
-      const total = snapshot.size;
-      updateProgress(total);
+        setTimeout(() => successMsg.classList.add("hidden"), 2000);
 
-      // If target reached
-      if (total >= TARGET) {
-        formCard.style.display = "none";       // hide submission form
-        lockedBox.classList.remove("hidden");  // show locked message
-        downloadBtn.style.display = "block";   // show download button to everyone
-        channelBox.style.display = "none";     // hide channel message
-      }
-
+        // Update stats after submission
+        updateStats();
     } catch (error) {
-      console.error(error);
-      successMsg.textContent = "Error saving contact!";
-      successMsg.classList.remove("hidden");
+        console.error("Error adding contact:", error);
+        alert("Failed to submit contact. Try again.");
     }
-  });
-
-  // Click handler for download button
-  downloadBtn.addEventListener("click", () => {
-    generateVCF(snapshot);
-  });
-
-  // Function to update progress bar & stats
-  function updateProgress(total) {
-    currentElem.textContent = total;
-    const remaining = TARGET - total;
-    remainingElem.textContent = remaining > 0 ? remaining : 0;
-    const percent = Math.min(Math.floor((total / TARGET) * 100), 100);
-    percentElem.textContent = percent + "%";
-    progressFill.style.width = percent + "%";
-  }
 });
 
-// Function to generate and download VCF
-function generateVCF(snapshot) {
-  let vcf = "";
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    vcf += `BEGIN:VCARD
+// Generate VCF with latest contacts
+async function generateVCF() {
+    const snapshot = await getDocs(collection(db, "contacts"));
+    let vcf = "";
+
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        vcf += `BEGIN:VCARD
 VERSION:3.0
 FN:${data.name}
 TEL:${data.phone}
 END:VCARD
 `;
-  });
+    });
 
-  const blob = new Blob([vcf], { type: "text/vcard" });
-  const url = URL.createObjectURL(blob);
+    const blob = new Blob([vcf], { type: "text/vcard" });
+    const url = URL.createObjectURL(blob);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "Prince_VCF_Gain.vcf";
-  a.click();
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Prince_VCF_Gain.vcf";
+    a.click();
 }
+
+// Handle VCF download
+downloadBtn.addEventListener("click", generateVCF);
