@@ -24,6 +24,11 @@
             <p id="success" class="success hidden">Contact submitted successfully!</p>
         </div>
 
+        <!-- New: message for already-submitted user -->
+        <p id="alreadySubmitted" class="success hidden" style="color: red; text-align:center; margin-top:10px;">
+            You have already submitted your contact.
+        </p>
+
         <div class="stats">
             <div class="stat"><span id="current">0</span><p>Current</p></div>
             <div class="stat"><span id="target">1000</span><p>Target</p></div>
@@ -36,10 +41,10 @@
             <div id="progressFill"></div>
         </div>
 
+        <!-- WhatsApp Channel box (will stay visible even after target reached) -->
         <div id="channelBox" class="channel-box">
             <p>VCF file will be released in our WhatsApp channel once we reach 1000 contacts</p>
 
-            <!-- ONLY CHANGE: WhatsApp channel button text updated -->
             <a href="https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X"
                class="submitBtnStyle"
                target="_blank">
@@ -51,12 +56,16 @@
             </p>
         </div>
 
-        <div id="locked" class="locked hidden">
-            🎉 Target Reached!  
-            VCF has been released in the WhatsApp Channel.
+        <!-- This shows when target is reached -->
+        <div id="locked" class="locked hidden" style="margin-top:20px; text-align:center;">
+            🔒 Verification Closed <br>
+            ✔ File to be dropped in the WhatsApp channel <br>
+            ✔ If you verified your contact, join the channel using the button above
         </div>
 
+        <!-- VCF button stays disabled / hidden -->
         <button id="downloadVCF" style="display:none;">Download VCF</button>
+
     </div>
 
     <script type="module" src="app.js"></script>
