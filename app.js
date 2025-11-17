@@ -36,7 +36,7 @@ const channelBox = document.getElementById("channelBox");
 // NEW
 const alreadySubmittedMsg = document.getElementById("alreadySubmitted");
 
-// NEW — prevent double submission
+// Prevent double submission
 function checkSubmissionLock() {
     if (localStorage.getItem("submitted_once") === "yes") {
         submitBtn.disabled = true;
@@ -63,16 +63,11 @@ async function updateStats() {
     percentElem.textContent = percent + "%";
     progressFill.style.width = percent + "%";
 
-    // When target reached
     if (total >= TARGET) {
-        formCard.style.display = "none";         // close submission
-        lockedBox.classList.remove("hidden");    // show your custom message
-        channelBox.style.display = "block";      // keep the WhatsApp button visible
-
-        // Automatically generate and download VCF
+        formCard.style.display = "none";
+        lockedBox.classList.remove("hidden");
+        channelBox.style.display = "block";
         generateVCF();
-
-        // Show download button as backup
         downloadBtn.style.display = "inline-block";
     }
 }
@@ -93,11 +88,11 @@ submitBtn.addEventListener("click", async () => {
     try {
         await addDoc(collection(db, "contacts"), { name, phone, time: Date.now() });
 
-        // NEW — lock further submissions
+        // Lock further submissions
         localStorage.setItem("submitted_once", "yes");
         checkSubmissionLock();
 
-        // normal success flow
+        // Normal success flow
         successMsg.textContent = "Contact submitted successfully!";
         successMsg.classList.remove("hidden");
         nameInput.value = "";
@@ -106,6 +101,11 @@ submitBtn.addEventListener("click", async () => {
         setTimeout(() => successMsg.classList.add("hidden"), 2000);
 
         updateStats();
+
+        // ✅ Automatically open WhatsApp channel after success
+        const whatsappChannelLink = "https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X";
+        window.open(whatsappChannelLink, "_blank");
+
     } catch (error) {
         console.error("Error adding contact:", error);
         alert("Failed to submit contact. Try again.");
