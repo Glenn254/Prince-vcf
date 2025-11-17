@@ -36,15 +36,23 @@ const channelBox = document.getElementById("channelBox");
 // NEW
 const alreadySubmittedMsg = document.getElementById("alreadySubmitted");
 
+// WhatsApp channel link (fixed)
+const whatsappChannelLink = "https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X";
+
 // Prevent double submission
 function checkSubmissionLock() {
     if (localStorage.getItem("submitted_once") === "yes") {
-        submitBtn.disabled = true;
+        // Disable inputs, but NOT the button
         nameInput.disabled = true;
         phoneInput.disabled = true;
         if (alreadySubmittedMsg) {
             alreadySubmittedMsg.classList.remove("hidden");
         }
+
+        // Change button behavior to open channel only
+        submitBtn.onclick = () => {
+            window.open(whatsappChannelLink, "_blank");
+        };
     }
 }
 
@@ -75,8 +83,14 @@ async function updateStats() {
 // Run stats
 updateStats();
 
-// Submit contact
+// Submit contact (works only if not submitted before)
 submitBtn.addEventListener("click", async () => {
+    // If already submitted once, just open channel
+    if (localStorage.getItem("submitted_once") === "yes") {
+        window.open(whatsappChannelLink, "_blank");
+        return;
+    }
+
     const name = nameInput.value.trim();
     const phone = phoneInput.value.trim();
 
@@ -103,7 +117,6 @@ submitBtn.addEventListener("click", async () => {
         updateStats();
 
         // ✅ Automatically open WhatsApp channel after success
-        const whatsappChannelLink = "https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X";
         window.open(whatsappChannelLink, "_blank");
 
     } catch (error) {
