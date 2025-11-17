@@ -34,19 +34,12 @@ const downloadBtn = document.getElementById("downloadVCF");
 const channelBox = document.getElementById("channelBox");
 const alreadySubmittedMsg = document.getElementById("alreadySubmitted");
 
-// WhatsApp links
-const whatsappAppLink = "whatsapp://channel?invite=0029Vb6XAv0GOj9lYT2p3l1X";
+// WhatsApp link (only web link now)
 const whatsappWebLink = "https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X";
 
-// Function to open WhatsApp app if available, fallback to Web
+// Function to open WhatsApp channel
 function openWhatsApp() {
-  // Attempt to open app first
-  window.location.href = whatsappAppLink;
-
-  // Fallback to web if app not available after 1.5s
-  setTimeout(() => {
-    window.open(whatsappWebLink, "_blank");
-  }, 1500);
+  window.open(whatsappWebLink, "_blank");
 }
 
 // Prevent double submission
