@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Your web app's Firebase configuration
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDQPWXo0PxlH-ASXsO6WZtEGJ4dv_rbkkY",
   authDomain: "princev-vcf.firebaseapp.com",
@@ -16,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Target contacts for unlocking VCF
+// Target contacts
 const TARGET = 1000;
 
 // DOM elements
@@ -28,16 +28,15 @@ const currentElem = document.getElementById("current");
 const remainingElem = document.getElementById("remaining");
 const percentElem = document.getElementById("percent");
 const progressFill = document.getElementById("progressFill");
-const lockedBox = document.getElementById("locked");
 const formCard = document.querySelector(".form-card");
 const downloadBtn = document.getElementById("downloadVCF");
 const channelBox = document.getElementById("channelBox");
 const alreadySubmittedMsg = document.getElementById("alreadySubmitted");
+const verificationClosed = document.getElementById("verificationClosed");
 
-// WhatsApp link (only web link now)
+// WhatsApp link
 const whatsappWebLink = "https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X";
 
-// Function to open WhatsApp channel
 function openWhatsApp() {
   window.open(whatsappWebLink, "_blank");
 }
@@ -45,19 +44,13 @@ function openWhatsApp() {
 // Prevent double submission
 function checkSubmissionLock() {
   if (localStorage.getItem("submitted_once") === "yes") {
-    // Disable inputs, but keep button active
     nameInput.disabled = true;
     phoneInput.disabled = true;
     if (alreadySubmittedMsg) alreadySubmittedMsg.classList.remove("hidden");
-
-    // Button now only opens channel
-    submitBtn.onclick = () => {
-      openWhatsApp();
-    };
+    submitBtn.onclick = () => openWhatsApp();
   }
 }
 
-// Run on load
 checkSubmissionLock();
 
 // Update stats
@@ -73,20 +66,23 @@ async function updateStats() {
   progressFill.style.width = percent + "%";
 
   if (total >= TARGET) {
+    // Hide form & download button
     formCard.style.display = "none";
-    lockedBox.classList.remove("hidden");
+    downloadBtn.style.display = "none";
+    alreadySubmittedMsg.classList.add("hidden");
+
+    // Show green attention message
+    verificationClosed.classList.remove("hidden");
+
+    // Keep channel box visible
     channelBox.style.display = "block";
-    generateVCF();
-    downloadBtn.style.display = "inline-block";
   }
 }
 
-// Run stats
 updateStats();
 
-// Submit contact (works only once)
+// Submit contact
 submitBtn.addEventListener("click", async () => {
-  // If already submitted, just open WhatsApp
   if (localStorage.getItem("submitted_once") === "yes") {
     openWhatsApp();
     return;
@@ -102,22 +98,18 @@ submitBtn.addEventListener("click", async () => {
 
   try {
     await addDoc(collection(db, "contacts"), { name, phone, time: Date.now() });
-
-    // Lock further submissions
     localStorage.setItem("submitted_once", "yes");
     checkSubmissionLock();
 
-    // Show success message
     successMsg.textContent = "Contact submitted successfully!";
     successMsg.classList.remove("hidden");
     nameInput.value = "";
     phoneInput.value = "";
 
-    // Wait briefly before hiding message and opening WhatsApp
     setTimeout(() => {
       successMsg.classList.add("hidden");
       openWhatsApp();
-    }, 1500); // ⏱️ 1.5 second delay
+    }, 1500);
 
     updateStats();
   } catch (error) {
@@ -126,7 +118,7 @@ submitBtn.addEventListener("click", async () => {
   }
 });
 
-// VCF generator (button hidden anyway)
+// VCF generator (hidden by default)
 async function generateVCF() {
   const snapshot = await getDocs(collection(db, "contacts"));
   let vcf = "";
