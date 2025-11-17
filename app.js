@@ -32,28 +32,24 @@ const lockedBox = document.getElementById("locked");
 const formCard = document.querySelector(".form-card");
 const downloadBtn = document.getElementById("downloadVCF");
 const channelBox = document.getElementById("channelBox");
-
-// NEW
 const alreadySubmittedMsg = document.getElementById("alreadySubmitted");
 
-// WhatsApp channel link (fixed)
+// WhatsApp channel link
 const whatsappChannelLink = "https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X";
 
 // Prevent double submission
 function checkSubmissionLock() {
-    if (localStorage.getItem("submitted_once") === "yes") {
-        // Disable inputs, but NOT the button
-        nameInput.disabled = true;
-        phoneInput.disabled = true;
-        if (alreadySubmittedMsg) {
-            alreadySubmittedMsg.classList.remove("hidden");
-        }
+  if (localStorage.getItem("submitted_once") === "yes") {
+    // Disable inputs, but keep button active
+    nameInput.disabled = true;
+    phoneInput.disabled = true;
+    if (alreadySubmittedMsg) alreadySubmittedMsg.classList.remove("hidden");
 
-        // Change button behavior to open channel only
-        submitBtn.onclick = () => {
-            window.open(whatsappChannelLink, "_blank");
-        };
-    }
+    // Button now only opens channel
+    submitBtn.onclick = () => {
+      window.open(whatsappChannelLink, "_blank");
+    };
+  }
 }
 
 // Run on load
@@ -61,92 +57,92 @@ checkSubmissionLock();
 
 // Update stats
 async function updateStats() {
-    const snapshot = await getDocs(collection(db, "contacts"));
-    const total = snapshot.size;
+  const snapshot = await getDocs(collection(db, "contacts"));
+  const total = snapshot.size;
 
-    currentElem.textContent = total;
-    remainingElem.textContent = Math.max(TARGET - total, 0);
+  currentElem.textContent = total;
+  remainingElem.textContent = Math.max(TARGET - total, 0);
 
-    const percent = Math.min(Math.floor((total / TARGET) * 100), 100);
-    percentElem.textContent = percent + "%";
-    progressFill.style.width = percent + "%";
+  const percent = Math.min(Math.floor((total / TARGET) * 100), 100);
+  percentElem.textContent = percent + "%";
+  progressFill.style.width = percent + "%";
 
-    if (total >= TARGET) {
-        formCard.style.display = "none";
-        lockedBox.classList.remove("hidden");
-        channelBox.style.display = "block";
-        generateVCF();
-        downloadBtn.style.display = "inline-block";
-    }
+  if (total >= TARGET) {
+    formCard.style.display = "none";
+    lockedBox.classList.remove("hidden");
+    channelBox.style.display = "block";
+    generateVCF();
+    downloadBtn.style.display = "inline-block";
+  }
 }
 
 // Run stats
 updateStats();
 
-// Submit contact (works only if not submitted before)
+// Submit contact (works only once)
 submitBtn.addEventListener("click", async () => {
-    // If already submitted once, just open channel
-    if (localStorage.getItem("submitted_once") === "yes") {
-        window.open(whatsappChannelLink, "_blank");
-        return;
-    }
+  // If already submitted, just open channel
+  if (localStorage.getItem("submitted_once") === "yes") {
+    window.open(whatsappChannelLink, "_blank");
+    return;
+  }
 
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
+  const name = nameInput.value.trim();
+  const phone = phoneInput.value.trim();
 
-    if (!name || !phone) {
-        alert("Please fill in both fields");
-        return;
-    }
+  if (!name || !phone) {
+    alert("Please fill in both fields");
+    return;
+  }
 
-    try {
-        await addDoc(collection(db, "contacts"), { name, phone, time: Date.now() });
+  try {
+    await addDoc(collection(db, "contacts"), { name, phone, time: Date.now() });
 
-        // Lock further submissions
-        localStorage.setItem("submitted_once", "yes");
-        checkSubmissionLock();
+    // Lock further submissions
+    localStorage.setItem("submitted_once", "yes");
+    checkSubmissionLock();
 
-        // Normal success flow
-        successMsg.textContent = "Contact submitted successfully!";
-        successMsg.classList.remove("hidden");
-        nameInput.value = "";
-        phoneInput.value = "";
+    // Show success message
+    successMsg.textContent = "Contact submitted successfully!";
+    successMsg.classList.remove("hidden");
+    nameInput.value = "";
+    phoneInput.value = "";
 
-        setTimeout(() => successMsg.classList.add("hidden"), 2000);
+    // Wait briefly before hiding message and opening WhatsApp
+    setTimeout(() => {
+      successMsg.classList.add("hidden");
+      window.open(whatsappChannelLink, "_blank");
+    }, 1500); // ⏱️ 1.5 second delay
 
-        updateStats();
-
-        // ✅ Automatically open WhatsApp channel after success
-        window.open(whatsappChannelLink, "_blank");
-
-    } catch (error) {
-        console.error("Error adding contact:", error);
-        alert("Failed to submit contact. Try again.");
-    }
+    updateStats();
+  } catch (error) {
+    console.error("Error adding contact:", error);
+    alert("Failed to submit contact. Try again.");
+  }
 });
 
 // VCF generator (button hidden anyway)
 async function generateVCF() {
-    const snapshot = await getDocs(collection(db, "contacts"));
-    let vcf = "";
+  const snapshot = await getDocs(collection(db, "contacts"));
+  let vcf = "";
 
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        vcf += `BEGIN:VCARD
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    vcf += `BEGIN:VCARD
 VERSION:3.0
 FN:${data.name}
 TEL:${data.phone}
 END:VCARD
 `;
-    });
+  });
 
-    const blob = new Blob([vcf], { type: "text/vcard" });
-    const url = URL.createObjectURL(blob);
+  const blob = new Blob([vcf], { type: "text/vcard" });
+  const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "Prince_VCF_Gain.vcf";
-    a.click();
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Prince_VCF_Gain.vcf";
+  a.click();
 }
 
 downloadBtn.addEventListener("click", generateVCF);
