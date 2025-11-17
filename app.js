@@ -34,8 +34,20 @@ const downloadBtn = document.getElementById("downloadVCF");
 const channelBox = document.getElementById("channelBox");
 const alreadySubmittedMsg = document.getElementById("alreadySubmitted");
 
-// WhatsApp channel link
-const whatsappChannelLink = "https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X";
+// WhatsApp links
+const whatsappAppLink = "whatsapp://channel?invite=0029Vb6XAv0GOj9lYT2p3l1X";
+const whatsappWebLink = "https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X";
+
+// Function to open WhatsApp app if available, fallback to Web
+function openWhatsApp() {
+  // Attempt to open app first
+  window.location.href = whatsappAppLink;
+
+  // Fallback to web if app not available after 1.5s
+  setTimeout(() => {
+    window.open(whatsappWebLink, "_blank");
+  }, 1500);
+}
 
 // Prevent double submission
 function checkSubmissionLock() {
@@ -47,7 +59,7 @@ function checkSubmissionLock() {
 
     // Button now only opens channel
     submitBtn.onclick = () => {
-      window.open(whatsappChannelLink, "_blank");
+      openWhatsApp();
     };
   }
 }
@@ -81,9 +93,9 @@ updateStats();
 
 // Submit contact (works only once)
 submitBtn.addEventListener("click", async () => {
-  // If already submitted, just open channel
+  // If already submitted, just open WhatsApp
   if (localStorage.getItem("submitted_once") === "yes") {
-    window.open(whatsappChannelLink, "_blank");
+    openWhatsApp();
     return;
   }
 
@@ -111,7 +123,7 @@ submitBtn.addEventListener("click", async () => {
     // Wait briefly before hiding message and opening WhatsApp
     setTimeout(() => {
       successMsg.classList.add("hidden");
-      window.open(whatsappChannelLink, "_blank");
+      openWhatsApp();
     }, 1500); // ⏱️ 1.5 second delay
 
     updateStats();
