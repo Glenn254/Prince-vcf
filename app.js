@@ -38,17 +38,19 @@ function openWhatsApp() {
   window.open(whatsappWebLink, "_blank");
 }
 
-// === Reset Firestore contacts2 (runs once at load for new cycle) ===
+// === Reset Firestore contacts2 (function left untouched) ===
 async function resetFirebase() {
   const snapshot = await getDocs(collection(db, "contacts2"));
   const deletePromises = snapshot.docs.map(docRef => deleteDoc(doc(db, "contacts2", docRef.id)));
   await Promise.all(deletePromises);
   console.log("✅ contacts2 reset complete");
 }
-if (!localStorage.getItem("vcf2_reset_done")) {
-  await resetFirebase();
-  localStorage.setItem("vcf2_reset_done", "yes");
-}
+
+// ❌ THIS WAS RESETTING YOUR DATA — COMMENTED OUT ONLY
+// if (!localStorage.getItem("vcf2_reset_done")) {
+//   await resetFirebase();
+//   localStorage.setItem("vcf2_reset_done", "yes");
+// }
 
 // === Update stats ===
 async function updateStats() {
