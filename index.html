@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prince VCF Gain</title>
+    <title>PRINCE VCF GAIN (2)</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <h1 class="title">Prince VCF Gain</h1>
+        <h1 class="title">PRINCE VCF GAIN (2)</h1>
         <p class="subtitle">Create & Share Global Contacts Instantly</p>
 
         <div class="form-card">
@@ -30,8 +30,8 @@
 
         <div class="stats">
             <div class="stat"><span id="current">0</span><p>Current</p></div>
-            <div class="stat"><span id="target">1000</span><p>Target</p></div>
-            <div class="stat"><span id="remaining">1000</span><p>Remaining</p></div>
+            <div class="stat"><span id="target">800</span><p>Target</p></div>
+            <div class="stat"><span id="remaining">800</span><p>Remaining</p></div>
         </div>
 
         <h3 class="progress-title">Progress to Unlock: <span id="percent">0%</span></h3>
@@ -40,15 +40,8 @@
             <div id="progressFill"></div>
         </div>
 
-        <!-- Green attention message (hidden initially) -->
-        <div id="verificationClosed" class="hidden" 
-             style="background-color:#4CAF50; color:white; border-radius:50px; padding:10px 15px; font-size:0.9em; display:inline-block; margin-bottom:10px; text-align:center;">
-            Attention, verification has closed. Join the channel and wait for the VCF file to drop there.
-        </div>
-
-        <!-- WhatsApp Channel box (will stay visible even after target reached) -->
         <div id="channelBox" class="channel-box">
-            <p>VCF file will be released in our WhatsApp channel once we reach 1000 contacts</p>
+            <p>VCF file will be released in our WhatsApp channel once we reach <b>800 contacts</b></p>
 
             <a href="https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X"
                class="submitBtnStyle"
@@ -61,7 +54,12 @@
             </p>
         </div>
 
-        <!-- VCF button stays hidden -->
+        <div id="locked" class="locked hidden" style="margin-top:20px; text-align:center;">
+            🔒 Verification Closed <br>
+            ✔ File to be dropped in the WhatsApp channel <br>
+            ✔ If you verified your contact, join the channel using the button above
+        </div>
+
         <button id="downloadVCF" style="display:none;">Download VCF</button>
 
     </div>
