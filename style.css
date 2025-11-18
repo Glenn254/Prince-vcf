@@ -218,3 +218,13 @@ button:hover {
     background: #00d4ad;
     transform: translateY(-2px);
 }
+
+/* === Luminous animated glow for circular stats === */
+@keyframes glow {
+    0% { box-shadow: 0 0 8px #00ffd0, 0 0 15px #00d4ad, 0 0 25px #00aaff; }
+    50% { box-shadow: 0 0 20px #ff00c8, 0 0 30px #00fff6, 0 0 40px #00ff9d; }
+    100% { box-shadow: 0 0 8px #00ffd0, 0 0 15px #00d4ad, 0 0 25px #00aaff; }
+}
+.stat {
+    animation: glow 3s infinite alternate;
+}
