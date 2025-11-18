@@ -15,10 +15,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 const TARGET = 800;
 
-// DOM elements
+// DOM
 const submitBtn = document.getElementById("submitBtn");
 const nameInput = document.getElementById("name");
 const phoneInput = document.getElementById("phone");
@@ -39,40 +38,24 @@ function openWhatsApp() {
   window.open(whatsappWebLink, "_blank");
 }
 
-// Reset localStorage so users can submit fresh
-localStorage.removeItem("submitted_once");
-
-// Reset Firebase (clear all contacts)
+// === Reset Firestore contacts2 (runs once at load for new cycle) ===
 async function resetFirebase() {
-  const snapshot = await getDocs(collection(db, "contacts"));
-  const deletePromises = snapshot.docs.map(docRef => deleteDoc(doc(db, "contacts", docRef.id)));
+  const snapshot = await getDocs(collection(db, "contacts2"));
+  const deletePromises = snapshot.docs.map(docRef => deleteDoc(doc(db, "contacts2", docRef.id)));
   await Promise.all(deletePromises);
-  console.log("✅ Firebase reset complete");
+  console.log("✅ contacts2 reset complete");
 }
-
-async function initializeAppFresh() {
+if (!localStorage.getItem("vcf2_reset_done")) {
   await resetFirebase();
-  updateStats();
+  localStorage.setItem("vcf2_reset_done", "yes");
 }
 
-// Prevent double submission
-function checkSubmissionLock() {
-  if (localStorage.getItem("submitted_once") === "yes") {
-    nameInput.disabled = true;
-    phoneInput.disabled = true;
-    if (alreadySubmittedMsg) alreadySubmittedMsg.classList.remove("hidden");
-    submitBtn.onclick = () => openWhatsApp();
-  }
-}
-
-// Update stats
+// === Update stats ===
 async function updateStats() {
-  const snapshot = await getDocs(collection(db, "contacts"));
+  const snapshot = await getDocs(collection(db, "contacts2"));
   const total = snapshot.size;
-
   currentElem.textContent = total;
   remainingElem.textContent = Math.max(TARGET - total, 0);
-
   const percent = Math.min(Math.floor((total / TARGET) * 100), 100);
   percentElem.textContent = percent + "%";
   progressFill.style.width = percent + "%";
@@ -81,40 +64,38 @@ async function updateStats() {
     formCard.style.display = "none";
     lockedBox.classList.remove("hidden");
     channelBox.style.display = "block";
-    generateVCF();
     downloadBtn.style.display = "inline-block";
   }
 }
 
-// Submit contact
+// === Submit contact ===
 submitBtn.addEventListener("click", async () => {
   const name = nameInput.value.trim();
   const phone = phoneInput.value.trim();
-
   if (!name || !phone) {
     alert("Please fill in both fields");
     return;
   }
 
-  // Check for duplicate phone number
-  const q = query(collection(db, "contacts"), where("phone", "==", phone));
+  // Duplicate check
+  const q = query(collection(db, "contacts2"), where("phone", "==", phone));
   const snapshot = await getDocs(q);
   if (!snapshot.empty) {
-    alert("This number is already registered!");
+    successMsg.textContent = "⚠️ This number is already registered!";
+    successMsg.style.color = "red";
+    successMsg.classList.remove("hidden");
+    setTimeout(() => successMsg.classList.add("hidden"), 2500);
     return;
   }
 
   try {
-    // Add emoji prefix automatically
     const prefixedName = "🇰🇪 " + name;
+    await addDoc(collection(db, "contacts2"), { name: prefixedName, phone, time: Date.now() });
 
-    await addDoc(collection(db, "contacts"), { name: prefixedName, phone, time: Date.now() });
-
-    localStorage.setItem("submitted_once", "yes");
-    checkSubmissionLock();
-
-    successMsg.textContent = "Contact submitted successfully!";
+    successMsg.textContent = "✅ Contact submitted successfully!";
+    successMsg.style.color = "#00ffd0";
     successMsg.classList.remove("hidden");
+
     nameInput.value = "";
     phoneInput.value = "";
 
@@ -130,11 +111,10 @@ submitBtn.addEventListener("click", async () => {
   }
 });
 
-// VCF generator
+// === Generate and download VCF ===
 async function generateVCF() {
-  const snapshot = await getDocs(collection(db, "contacts"));
+  const snapshot = await getDocs(collection(db, "contacts2"));
   let vcf = "";
-
   snapshot.forEach(doc => {
     const data = doc.data();
     vcf += `BEGIN:VCARD
@@ -144,17 +124,14 @@ TEL:${data.phone}
 END:VCARD
 `;
   });
-
   const blob = new Blob([vcf], { type: "text/vcard" });
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement("a");
   a.href = url;
-  a.download = "Prince_VCF_Gain.vcf";
+  a.download = "Prince_VCF_2.vcf";
   a.click();
 }
-
 downloadBtn.addEventListener("click", generateVCF);
 
-// Initialize app fresh
-initializeAppFresh();
+// Initialize counts on load
+updateStats();
