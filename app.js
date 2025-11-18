@@ -46,12 +46,6 @@ async function resetFirebase() {
   console.log("✅ contacts2 reset complete");
 }
 
-// ❌ THIS WAS RESETTING YOUR DATA — COMMENTED OUT ONLY
-// if (!localStorage.getItem("vcf2_reset_done")) {
-//   await resetFirebase();
-//   localStorage.setItem("vcf2_reset_done", "yes");
-// }
-
 // === Update stats ===
 async function updateStats() {
   const snapshot = await getDocs(collection(db, "contacts2"));
@@ -134,6 +128,13 @@ END:VCARD
   a.click();
 }
 downloadBtn.addEventListener("click", generateVCF);
+
+// === SAFE DEBUG: This only reads contacts2 count (no changes) ===
+async function debugContacts2() {
+  const snapshot = await getDocs(collection(db, "contacts2"));
+  console.log("📌 contacts2 count:", snapshot.size);
+}
+debugContacts2();
 
 // Initialize counts on load
 updateStats();
