@@ -6,8 +6,9 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* ===== New Background / Theme ===== */
 body {
-    background: linear-gradient(135deg, #6a0dad, #b122ff);
+    background: linear-gradient(135deg, #003644, #009688);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -16,10 +17,10 @@ body {
 }
 
 .container {
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.55);
     padding: 30px 40px;
     border-radius: 15px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 35px rgba(0, 0, 0, 0.65);
     max-width: 500px;
     width: 100%;
     text-align: center;
@@ -29,15 +30,16 @@ body {
     font-size: 2.2rem;
     margin-bottom: 5px;
     font-weight: bold;
-    color: #ffde59;
+    color: #00ffd0; /* NEW header color */
 }
 
 .subtitle {
     font-size: 1rem;
     margin-bottom: 25px;
-    color: #e0cfff;
+    color: #c2fffa;
 }
 
+/* FORM */
 .form-card {
     background: rgba(255, 255, 255, 0.05);
     padding: 20px;
@@ -73,12 +75,13 @@ body {
     background: rgba(255,255,255,0.3);
 }
 
+/* ===== NEW BUTTON COLOR ===== */
 button {
     padding: 12px 20px;
-    background: #ffde59;
+    background: #00ffd0;
     border: none;
     border-radius: 10px;
-    color: #6a0dad;
+    color: #003644;
     font-weight: bold;
     font-size: 1rem;
     cursor: pointer;
@@ -87,12 +90,12 @@ button {
 }
 
 button:hover {
-    background: #e6c84c;
+    background: #00d4ad;
     transform: translateY(-2px);
 }
 
 .success {
-    color: #00ffcc;
+    color: #00ffd0;
     margin-top: 10px;
     font-weight: 600;
 }
@@ -101,16 +104,29 @@ button:hover {
     display: none;
 }
 
+/* ===== CIRCULAR STATS ===== */
 .stats {
     display: flex;
     justify-content: space-around;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .stat {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 10px 15px;
-    border-radius: 10px;
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid #00ffd0;
+    transition: 0.4s ease;
+}
+
+.stat:hover {
+    transform: scale(1.08);
+    border-color: #00d4ad;
 }
 
 .stat span {
@@ -118,6 +134,7 @@ button:hover {
     font-weight: bold;
 }
 
+/* Progress bar */
 .progress-bar {
     width: 100%;
     background: rgba(255, 255, 255, 0.1);
@@ -130,11 +147,12 @@ button:hover {
 #progressFill {
     height: 100%;
     width: 0;
-    background: #ffde59;
+    background: #00ffd0;
     border-radius: 10px 0 0 10px;
     transition: width 0.5s ease-in-out;
 }
 
+/* WhatsApp Box */
 .channel-box {
     background: rgba(255, 255, 255, 0.1);
     padding: 15px;
@@ -143,7 +161,7 @@ button:hover {
 }
 
 .channel-box a {
-    color: #ffffff; /* Changed to white for full visibility */
+    color: #ffffff;
     font-weight: bold;
     text-decoration: none;
 }
@@ -157,13 +175,13 @@ button:hover {
     padding: 15px;
     border-radius: 12px;
     font-weight: bold;
-    color: #00ffcc;
+    color: #00ffd0;
     margin-bottom: 15px;
 }
 
 #downloadVCF {
-    background: #00ffcc;
-    color: #6a0dad;
+    background: #00ffd0;
+    color: #003644;
     font-weight: bold;
     padding: 12px 20px;
     border-radius: 12px;
@@ -174,19 +192,19 @@ button:hover {
 }
 
 #downloadVCF:hover {
-    background: #00e6b8;
+    background: #00d4ad;
     transform: translateY(-2px);
 }
 
-/* ====== Added CSS to make WhatsApp button match submit button ====== */
+/* WhatsApp Button Style (kept intact) */
 .submitBtnStyle {
     display: inline-block;
     width: 100%;
     padding: 12px 20px;
-    background: #ffde59; /* same as submit button */
+    background: #00ffd0;
     border: none;
     border-radius: 10px;
-    color: #ffffff; /* changed to white for readability */
+    color: #003644;
     font-weight: bold;
     font-size: 1rem;
     text-align: center;
@@ -197,6 +215,6 @@ button:hover {
 }
 
 .submitBtnStyle:hover {
-    background: #e6c84c;
+    background: #00d4ad;
     transform: translateY(-2px);
 }
