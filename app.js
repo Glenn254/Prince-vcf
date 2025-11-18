@@ -1,6 +1,6 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -16,8 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Target contacts
-const TARGET = 1000;
+const TARGET = 800;
 
 // DOM elements
 const submitBtn = document.getElementById("submitBtn");
@@ -28,17 +27,32 @@ const currentElem = document.getElementById("current");
 const remainingElem = document.getElementById("remaining");
 const percentElem = document.getElementById("percent");
 const progressFill = document.getElementById("progressFill");
+const lockedBox = document.getElementById("locked");
 const formCard = document.querySelector(".form-card");
 const downloadBtn = document.getElementById("downloadVCF");
 const channelBox = document.getElementById("channelBox");
 const alreadySubmittedMsg = document.getElementById("alreadySubmitted");
-const verificationClosed = document.getElementById("verificationClosed");
 
-// WhatsApp link
 const whatsappWebLink = "https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X";
 
 function openWhatsApp() {
   window.open(whatsappWebLink, "_blank");
+}
+
+// Reset localStorage so users can submit fresh
+localStorage.removeItem("submitted_once");
+
+// Reset Firebase (clear all contacts)
+async function resetFirebase() {
+  const snapshot = await getDocs(collection(db, "contacts"));
+  const deletePromises = snapshot.docs.map(docRef => deleteDoc(doc(db, "contacts", docRef.id)));
+  await Promise.all(deletePromises);
+  console.log("✅ Firebase reset complete");
+}
+
+async function initializeAppFresh() {
+  await resetFirebase();
+  updateStats();
 }
 
 // Prevent double submission
@@ -50,8 +64,6 @@ function checkSubmissionLock() {
     submitBtn.onclick = () => openWhatsApp();
   }
 }
-
-checkSubmissionLock();
 
 // Update stats
 async function updateStats() {
@@ -66,28 +78,16 @@ async function updateStats() {
   progressFill.style.width = percent + "%";
 
   if (total >= TARGET) {
-    // Hide form & download button
     formCard.style.display = "none";
-    downloadBtn.style.display = "none";
-    alreadySubmittedMsg.classList.add("hidden");
-
-    // Show green attention message
-    verificationClosed.classList.remove("hidden");
-
-    // Keep channel box visible
+    lockedBox.classList.remove("hidden");
     channelBox.style.display = "block";
+    generateVCF();
+    downloadBtn.style.display = "inline-block";
   }
 }
 
-updateStats();
-
 // Submit contact
 submitBtn.addEventListener("click", async () => {
-  if (localStorage.getItem("submitted_once") === "yes") {
-    openWhatsApp();
-    return;
-  }
-
   const name = nameInput.value.trim();
   const phone = phoneInput.value.trim();
 
@@ -96,8 +96,20 @@ submitBtn.addEventListener("click", async () => {
     return;
   }
 
+  // Check for duplicate phone number
+  const q = query(collection(db, "contacts"), where("phone", "==", phone));
+  const snapshot = await getDocs(q);
+  if (!snapshot.empty) {
+    alert("This number is already registered!");
+    return;
+  }
+
   try {
-    await addDoc(collection(db, "contacts"), { name, phone, time: Date.now() });
+    // Add emoji prefix automatically
+    const prefixedName = "🇰🇪 " + name;
+
+    await addDoc(collection(db, "contacts"), { name: prefixedName, phone, time: Date.now() });
+
     localStorage.setItem("submitted_once", "yes");
     checkSubmissionLock();
 
@@ -118,7 +130,7 @@ submitBtn.addEventListener("click", async () => {
   }
 });
 
-// VCF generator (hidden by default)
+// VCF generator
 async function generateVCF() {
   const snapshot = await getDocs(collection(db, "contacts"));
   let vcf = "";
@@ -143,3 +155,6 @@ END:VCARD
 }
 
 downloadBtn.addEventListener("click", generateVCF);
+
+// Initialize app fresh
+initializeAppFresh();
