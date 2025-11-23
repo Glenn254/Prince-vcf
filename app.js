@@ -60,7 +60,7 @@ async function updateStats() {
     formCard.style.display = "none";
     lockedBox.classList.remove("hidden");
     channelBox.style.display = "block";
-    downloadBtn.style.display = "inline-block";
+    downloadBtn.style.display = "none";
   }
 }
 
