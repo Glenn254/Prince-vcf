@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prince VCF (3)</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <!-- Live animated background container -->
   <div id="background"></div>
 
   <div class="container">
-    <h1 class="title glow">Prince VCF (3)</h1>
+    <h1 class="title">Prince VCF (3)</h1>
     <p class="subtitle">Create & Share Global Contacts Instantly</p>
 
     <div class="form-card">
@@ -30,9 +30,18 @@
     </p>
 
     <div class="stats">
-      <div class="stat"><span id="current">0</span><p>Current</p></div>
-      <div class="stat"><span id="target">800</span><p>Target</p></div>
-      <div class="stat"><span id="remaining">800</span><p>Remaining</p></div>
+      <div class="stat" id="stat-current" style="--color:#1e90ff; --pct:0;">
+        <span id="current">0</span>
+        <p>Current</p>
+      </div>
+      <div class="stat" id="stat-target" style="--color:#ff4d4d; --pct:0;">
+        <span id="target">800</span>
+        <p>Target</p>
+      </div>
+      <div class="stat" id="stat-remaining" style="--color:#ffd300; --pct:360;">
+        <span id="remaining">800</span>
+        <p>Remaining</p>
+      </div>
     </div>
 
     <h3 class="progress-title">Progress to Unlock: <span id="percent">0%</span></h3>
