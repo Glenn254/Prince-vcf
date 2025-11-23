@@ -68,7 +68,7 @@ let voicePlayed = false;
 nameInput.addEventListener("focus", () => {
   if (!voicePlayed) {
     try {
-      const audio = new Audio("audio/greeting.mp3");
+      const audio = new Audio("https://audio-srwq.onrender.com/audio.mp3");
       audio.play();
     } catch (e) {
       // ignore if audio not present
