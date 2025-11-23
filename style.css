@@ -6,7 +6,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Live animated gradient background */
+/* Live animated gradient background remains (keeps "live" feel) */
 body {
   min-height: 100vh;
   overflow: hidden;
@@ -25,97 +25,96 @@ body {
   100% {background-position: 0% 50%;}
 }
 
-/* Container */
+/* Container: slightly transparent and simple */
 .container {
-  background: rgba(0, 0, 0, 0.6);
-  padding: 35px 40px;
-  border-radius: 20px;
-  box-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
-  max-width: 500px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 28px 32px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  max-width: 520px;
   width: 100%;
   text-align: center;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(6px);
 }
 
-/* Luminous heading */
+/* Title: keep yellow color but remove heavy glow for simplicity */
 .title {
-  font-size: 2.4rem;
-  font-weight: bold;
-  color: #fff500;
-  text-shadow: 0 0 15px #fff500, 0 0 25px #ffd700, 0 0 40px #ffff99;
-  animation: glowTitle 2s ease-in-out infinite alternate;
-}
-
-@keyframes glowTitle {
-  from {text-shadow: 0 0 10px #fff500, 0 0 20px #ffcc00;}
-  to   {text-shadow: 0 0 30px #ffdd00, 0 0 60px #ffff99;}
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #ffd700;
+  margin-bottom: 6px;
+  text-shadow: none;
 }
 
 .subtitle {
   color: #d9fffa;
-  margin-bottom: 25px;
-  font-size: 1rem;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
 }
 
 /* Form */
 .form-card {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
   text-align: left;
 }
 
 .form-card label {
   font-weight: 600;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   display: block;
+  color: rgba(255,255,255,0.9);
+  font-size: 0.95rem;
 }
 
 .form-card input {
   width: 100%;
   padding: 10px 12px;
-  margin-bottom: 15px;
-  border: none;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 8px;
   outline: none;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.03);
   color: #fff;
-  font-size: 1rem;
-  transition: background 0.3s;
+  font-size: 0.95rem;
+  transition: background 0.18s, box-shadow 0.18s;
 }
 
 .form-card input::placeholder {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .form-card input:focus {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 8px rgba(0,0,0,0.25) inset;
 }
 
-/* Buttons */
+/* Buttons keep their colors and are simple */
 button, .whatsapp-btn, .support-btn {
   display: inline-block;
   width: 100%;
-  padding: 12px 20px;
+  padding: 12px 18px;
   border: none;
-  border-radius: 10px;
-  font-weight: bold;
+  border-radius: 8px;
+  font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
   text-align: center;
-  transition: all 0.3s ease;
-  margin-top: 10px;
+  transition: transform 0.14s ease;
+  margin-top: 8px;
   text-decoration: none;
 }
 
+/* Submit button - yellow like before but simpler */
 #submitBtn {
-  background: linear-gradient(90deg, #ffd700, #fff000);
-  color: #333;
+  background: linear-gradient(90deg, #ffd700, #ffdf5a);
+  color: #111;
+  box-shadow: none;
 }
 
 #submitBtn:hover {
-  background: linear-gradient(90deg, #fff700, #ffea00);
   transform: translateY(-2px);
 }
 
@@ -124,93 +123,100 @@ button, .whatsapp-btn, .support-btn {
   color: #fff;
 }
 
-.whatsapp-btn:hover {
-  background: #1da851;
-  transform: translateY(-2px);
-}
+.whatsapp-btn:hover { transform: translateY(-2px); }
 
 .support-btn {
   background: #1da1f2;
   color: #fff;
 }
 
-.support-btn:hover {
-  background: #0b86d1;
-  transform: translateY(-2px);
-}
+.support-btn:hover { transform: translateY(-2px); }
 
-/* Success message */
+/* Success message - simpler */
 .success {
-  color: #fff500;
+  color: #ffd700;
   font-weight: 600;
   text-align: center;
-  margin-top: 10px;
-  text-shadow: 0 0 5px #fff500, 0 0 10px #ffd700, 0 0 15px #ffff99;
+  margin-top: 8px;
 }
 
 .hidden {display: none;}
 
-/* Stats */
+/* Stats - make them outlined rings (not full luminous circles) */
+/* We use a conic-gradient ring visual with a CSS variable --pct controlling progress (0..360) */
 .stats {
   display: flex;
   justify-content: space-around;
-  margin: 20px 0;
+  margin: 18px 0;
+  gap: 12px;
 }
 
 .stat {
-  width: 85px;
-  height: 85px;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.08);
+  background: conic-gradient(var(--color) calc(var(--pct) * 1deg), rgba(255,255,255,0.05) 0deg);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 3px solid #fff500;
-  animation: glowStat 3s infinite alternate;
+  position: relative;
+  /* inner circle to create ring effect */
+  box-shadow: none;
 }
 
-@keyframes glowStat {
-  0% { box-shadow: 0 0 10px #fff500, 0 0 20px #ffdd00; }
-  100% { box-shadow: 0 0 20px #ffdd00, 0 0 40px #ffff99; }
+.stat::after {
+  content: "";
+  position: absolute;
+  width: 78%;
+  height: 78%;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  top: 11%;
+  left: 11%;
 }
 
 .stat span {
-  font-size: 1.2rem;
-  font-weight: bold;
+  position: relative;
+  z-index: 2;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #fff;
 }
 
-/* Progress bar */
+.stat p {
+  position: relative;
+  z-index: 2;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.85);
+}
+
+/* Progress bar (simple and clean) */
 .progress-bar {
   width: 100%;
-  background: rgba(255, 255, 255, 0.15);
-  height: 20px;
+  background: rgba(255, 255, 255, 0.07);
+  height: 18px;
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255,255,255,0.03);
 }
 
 #progressFill {
   height: 100%;
   width: 0;
-  background: linear-gradient(270deg, #fff500, #ffd700, #ffff99, #fff500);
-  background-size: 600% 100%;
-  animation: progressGlow 3s linear infinite;
+  background: linear-gradient(90deg, #1e90ff, #ff4d4d, #ffd300);
   border-radius: 10px 0 0 10px;
-  transition: width 0.5s ease-in-out;
-}
-
-@keyframes progressGlow {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+  transition: width 0.45s ease-in-out;
 }
 
 /* Channel box */
 .channel-box {
-  background: rgba(255,255,255,0.08);
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 20px;
+  background: rgba(255,255,255,0.04);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
 }
 
 .nb-warning {
@@ -219,40 +225,33 @@ button, .whatsapp-btn, .support-btn {
   color: #ffd700;
 }
 
-/* Follow/help message */
+/* Follow/help message kept readable */
 .follow-msg {
   font-size: 0.9rem;
   margin-top: 10px;
-  color: #00bfff;
-  text-shadow: 0 0 5px #00bfff, 0 0 10px #ffd700, 0 0 15px #ffff99;
-  animation: glowFollow 2s ease-in-out infinite alternate;
+  color: #99e6ff;
 }
 
-@keyframes glowFollow {
-  from { text-shadow: 0 0 5px #00bfff, 0 0 10px #ffd700, 0 0 15px #ffff99; }
-  to   { text-shadow: 0 0 10px #00bfff, 0 0 20px #ffd700, 0 0 30px #ffff99; }
-}
-
+/* Locked box */
 .locked {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 15px;
-  border-radius: 12px;
-  font-weight: bold;
-  color: #fff500;
+  background: rgba(0, 0, 0, 0.33);
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #ffd700;
 }
 
+/* Download button style (kept similar to submit) */
 #downloadVCF {
-  background: linear-gradient(90deg, #ffd700, #fff000);
-  color: #333;
-  font-weight: bold;
+  background: linear-gradient(90deg, #ffd700, #ffdf5a);
+  color: #111;
+  font-weight: 700;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: transform 0.14s;
   width: 100%;
+  padding: 12px 16px;
 }
 
-#downloadVCF:hover {
-  background: linear-gradient(90deg, #fff700, #ffea00);
-  transform: translateY(-2px);
-}
+#downloadVCF:hover { transform: translateY(-2px); }
