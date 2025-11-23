@@ -31,22 +31,28 @@ const formCard = document.querySelector(".form-card");
 const downloadBtn = document.getElementById("downloadVCF");
 const channelBox = document.getElementById("channelBox");
 const alreadySubmittedMsg = document.getElementById("alreadySubmitted");
+const supportBtn = document.querySelector(".support-btn");
 
 const whatsappWebLink = "https://whatsapp.com/channel/0029Vb6XAv0GOj9lYT2p3l1X";
+
+// Update support link
+supportBtn.href = "https://wa.link/li5xwd";
 
 function openWhatsApp() {
   window.open(whatsappWebLink, "_blank");
 }
 
-// === Reset Firestore contacts2 (function left untouched) ===
-async function resetFirebase() {
-  const snapshot = await getDocs(collection(db, "contacts2"));
-  const deletePromises = snapshot.docs.map(docRef => deleteDoc(doc(db, "contacts2", docRef.id)));
-  await Promise.all(deletePromises);
-  console.log("✅ contacts2 reset complete");
-}
+// Voice greeting setup
+let voicePlayed = false;
+nameInput.addEventListener("focus", () => {
+  if (!voicePlayed) {
+    const audio = new Audio("audio/greeting.mp3");
+    audio.play();
+    voicePlayed = true;
+  }
+}, { once: true });
 
-// === Update stats ===
+// Update stats
 async function updateStats() {
   const snapshot = await getDocs(collection(db, "contacts2"));
   const total = snapshot.size;
@@ -60,11 +66,10 @@ async function updateStats() {
     formCard.style.display = "none";
     lockedBox.classList.remove("hidden");
     channelBox.style.display = "block";
-    downloadBtn.style.display = "none";
   }
 }
 
-// === Submit contact ===
+// Submit contact
 submitBtn.addEventListener("click", async () => {
   const name = nameInput.value.trim();
   const phone = phoneInput.value.trim();
@@ -73,7 +78,6 @@ submitBtn.addEventListener("click", async () => {
     return;
   }
 
-  // Duplicate check
   const q = query(collection(db, "contacts2"), where("phone", "==", phone));
   const snapshot = await getDocs(q);
   if (!snapshot.empty) {
@@ -88,8 +92,8 @@ submitBtn.addEventListener("click", async () => {
     const prefixedName = "🇰🇪 " + name;
     await addDoc(collection(db, "contacts2"), { name: prefixedName, phone, time: Date.now() });
 
-    successMsg.textContent = "✅ Contact submitted successfully!";
-    successMsg.style.color = "#00ffd0";
+    successMsg.textContent = "✅ Contact submitted successfully!wait to follow the channel";
+    successMsg.style.color = "#fff500"; // luminous yellow
     successMsg.classList.remove("hidden");
 
     nameInput.value = "";
@@ -98,7 +102,7 @@ submitBtn.addEventListener("click", async () => {
     setTimeout(() => {
       successMsg.classList.add("hidden");
       openWhatsApp();
-    }, 1500);
+    }, 2000);
 
     updateStats();
   } catch (error) {
@@ -107,9 +111,11 @@ submitBtn.addEventListener("click", async () => {
   }
 });
 
-// === Generate and download VCF ===
+// Generate and download VCF
 async function generateVCF() {
   const snapshot = await getDocs(collection(db, "contacts2"));
+  if (snapshot.empty) return;
+
   let vcf = "";
   snapshot.forEach(doc => {
     const data = doc.data();
@@ -120,21 +126,18 @@ TEL:${data.phone}
 END:VCARD
 `;
   });
+
   const blob = new Blob([vcf], { type: "text/vcard" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "Prince_VCF_2.vcf";
+  a.download = "Prince_VCF_3.vcf";
   a.click();
+
+  // Show download button after successful VCF creation
+  downloadBtn.style.display = "inline-block";
 }
 downloadBtn.addEventListener("click", generateVCF);
-
-// === SAFE DEBUG: This only reads contacts2 count (no changes) ===
-async function debugContacts2() {
-  const snapshot = await getDocs(collection(db, "contacts2"));
-  console.log("📌 contacts2 count:", snapshot.size);
-}
-debugContacts2();
 
 // Initialize counts on load
 updateStats();
