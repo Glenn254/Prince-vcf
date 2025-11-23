@@ -46,19 +46,21 @@ function openWhatsApp() {
   window.open(whatsappWebLink, "_blank");
 }
 
-// --- NEW ROUND: start counting from zero now ---
+// --- ROUND START HANDLING ---
 // We set a round start timestamp in localStorage so counts use only contacts added after this time.
-// This avoids deleting any existing Firestore data and gives you a fresh "round" that begins now.
+// IMPORTANT: do NOT reset this on every page load — that caused counts to jump back to zero on refresh.
 const roundStartKey = "princev_roundStart";
 const vcfCreatedForRoundKey = "princev_vcfCreatedForRound";
-// Start a new round immediately (user requested to start from zero now)
-const now = Date.now();
-localStorage.setItem(roundStartKey, String(now));
-localStorage.removeItem(vcfCreatedForRoundKey); // ensure VCF not marked created for the new round
+
+// Only initialize roundStart if it doesn't exist. Set to "0" so existing Firestore contacts are counted.
+if (!localStorage.getItem(roundStartKey)) {
+  localStorage.setItem(roundStartKey, "0");
+}
+// (Do not remove the vcf flag on page load — keep previously-generated VCF state.)
 
 function getRoundStart() {
   const raw = localStorage.getItem(roundStartKey);
-  return raw ? Number(raw) : Date.now();
+  return raw ? Number(raw) : 0;
 }
 
 // Voice greeting setup (keeps the same logic)
@@ -164,7 +166,7 @@ submitBtn.addEventListener("click", async () => {
     });
 
     if (already) {
-      successMsg.textContent = "⚠️ This number is already registered for this round!";
+      successMsg.textContent = "⚠️ This number is already registered for this vcf!";
       successMsg.style.color = "red";
       successMsg.classList.remove("hidden");
       setTimeout(() => successMsg.classList.add("hidden"), 2500);
