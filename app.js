@@ -187,7 +187,7 @@ submitBtn.addEventListener("click", async () => {
     setTimeout(() => {
       successMsg.classList.add("hidden");
       openWhatsApp();
-    }, 1600);
+    }, 1000);
 
     // Update stats after adding
     updateStats();
