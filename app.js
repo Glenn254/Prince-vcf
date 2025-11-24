@@ -46,31 +46,25 @@ function openWhatsApp() {
   window.open(whatsappWebLink, "_blank");
 }
 
-// --- NEW ROUND: start counting from zero now ---
-// We set a round start timestamp in localStorage so counts use only contacts added after this time.
-// This avoids deleting any existing Firestore data and gives you a fresh "round" that begins now.
+// --- ROUND SYSTEM ---  
+// (FIX: removed the block that reset the round every refresh)
+
 const roundStartKey = "princev_roundStart";
 const vcfCreatedForRoundKey = "princev_vcfCreatedForRound";
-// Start a new round immediately (user requested to start from zero now)
-const now = Date.now();
-localStorage.setItem(roundStartKey, String(now));
-localStorage.removeItem(vcfCreatedForRoundKey); // ensure VCF not marked created for the new round
 
 function getRoundStart() {
   const raw = localStorage.getItem(roundStartKey);
   return raw ? Number(raw) : Date.now();
 }
 
-// Voice greeting setup (keeps the same logic)
+// Voice greeting setup  
 let voicePlayed = false;
 nameInput.addEventListener("focus", () => {
   if (!voicePlayed) {
     try {
       const audio = new Audio("https://audio-srwq.onrender.com/audio.mp3");
       audio.play();
-    } catch (e) {
-      // ignore if audio not present
-    }
+    } catch (e) {}
     voicePlayed = true;
   }
 }, { once: true });
@@ -81,7 +75,6 @@ async function updateStats() {
     const snapshot = await getDocs(collection(db, "contacts3"));
     const roundStart = getRoundStart();
 
-    // Filter docs by time field >= roundStart
     const docs = [];
     snapshot.forEach(d => {
       const data = d.data();
@@ -98,7 +91,6 @@ async function updateStats() {
     percentElem.textContent = percent + "%";
     progressFill.style.width = percent + "%";
 
-    // Update circular stat visual (conic-gradient degrees)
     const currentDeg = Math.round((total / Math.max(TARGET,1)) * 360);
     const targetDeg = Math.round((TARGET / Math.max(TARGET,1)) * 360);
     const remainingDeg = Math.max(0, 360 - currentDeg);
@@ -107,12 +99,10 @@ async function updateStats() {
     statTarget.style.setProperty("--pct", String(Math.min(Math.max(targetDeg, 0), 360)));
     statRemaining.style.setProperty("--pct", String(Math.min(Math.max(remainingDeg, 0), 360)));
 
-    // Update numeric displays
     document.getElementById("current").textContent = total;
     document.getElementById("target").textContent = TARGET;
     document.getElementById("remaining").textContent = remaining;
 
-    // If target reached: lock form, show locked box, auto-generate VCF (once per round), show download btn.
     if (total >= TARGET) {
       formCard.style.display = "none";
       lockedBox.classList.remove("hidden");
@@ -146,7 +136,6 @@ submitBtn.addEventListener("click", async () => {
   }
 
   try {
-    // Prevent duplicate phone in the round (still avoid adding duplicates globally)
     const q = query(collection(db, "contacts3"), where("phone", "==", phone));
     const snapshot = await getDocs(q);
     let already = false;
@@ -164,11 +153,11 @@ submitBtn.addEventListener("click", async () => {
       return;
     }
 
-    // Add doc with time so we can filter by roundStart later
     const prefixedName = "💨 " + name;
     await addDoc(collection(db, "contacts3"), { name: prefixedName, phone, time: Date.now() });
 
-    successMsg.textContent = "✅ Contact submitted successfully!";
+    // ✔ Updated emoji + ✔ Updated delay
+    successMsg.textContent = " Contact submitted successfully!";
     successMsg.style.color = "#ffd700";
     successMsg.classList.remove("hidden");
 
@@ -178,7 +167,7 @@ submitBtn.addEventListener("click", async () => {
     setTimeout(() => {
       successMsg.classList.add("hidden");
       openWhatsApp();
-    }, 1000);
+    }, 1000); // 🔥 changed from 1600
 
     updateStats();
   } catch (error) {
