@@ -46,9 +46,7 @@ function openWhatsApp() {
   window.open(whatsappWebLink, "_blank");
 }
 
-// --- ROUND SYSTEM ---  
-// (FIX: removed the block that reset the round every refresh)
-
+// --- ROUND SYSTEM (kept but NOT used in counting) ---
 const roundStartKey = "princev_roundStart";
 const vcfCreatedForRoundKey = "princev_vcfCreatedForRound";
 
@@ -57,7 +55,7 @@ function getRoundStart() {
   return raw ? Number(raw) : Date.now();
 }
 
-// Voice greeting setup  
+// Voice greeting setup
 let voicePlayed = false;
 nameInput.addEventListener("focus", () => {
   if (!voicePlayed) {
@@ -69,35 +67,33 @@ nameInput.addEventListener("focus", () => {
   }
 }, { once: true });
 
-// Update stats (only count docs added after roundStart)
+// Update stats (GLOBAL count – FIXED)
 async function updateStats() {
   try {
     const snapshot = await getDocs(collection(db, "contacts3"));
-    const roundStart = getRoundStart();
 
     const docs = [];
     snapshot.forEach(d => {
       const data = d.data();
-      if (data && data.time && Number(data.time) >= roundStart) {
-        docs.push({ id: d.id, data });
-      }
+      if (data) docs.push({ id: d.id, data });
     });
 
     const total = docs.length;
+
     currentElem.textContent = total;
     const remaining = Math.max(TARGET - total, 0);
     remainingElem.textContent = remaining;
+
     const percent = Math.min(Math.floor((total / TARGET) * 100), 100);
     percentElem.textContent = percent + "%";
     progressFill.style.width = percent + "%";
 
     const currentDeg = Math.round((total / Math.max(TARGET,1)) * 360);
-    const targetDeg = Math.round((TARGET / Math.max(TARGET,1)) * 360);
     const remainingDeg = Math.max(0, 360 - currentDeg);
 
-    statCurrent.style.setProperty("--pct", String(Math.min(Math.max(currentDeg, 0), 360)));
-    statTarget.style.setProperty("--pct", String(Math.min(Math.max(targetDeg, 0), 360)));
-    statRemaining.style.setProperty("--pct", String(Math.min(Math.max(remainingDeg, 0), 360)));
+    statCurrent.style.setProperty("--pct", currentDeg);
+    statTarget.style.setProperty("--pct", 360);
+    statRemaining.style.setProperty("--pct", remainingDeg);
 
     document.getElementById("current").textContent = total;
     document.getElementById("target").textContent = TARGET;
@@ -139,14 +135,13 @@ submitBtn.addEventListener("click", async () => {
     const q = query(collection(db, "contacts3"), where("phone", "==", phone));
     const snapshot = await getDocs(q);
     let already = false;
+
     snapshot.forEach(doc => {
-      const d = doc.data();
-      const t = d.time ? Number(d.time) : 0;
-      if (t >= getRoundStart()) already = true;
+      already = true;
     });
 
     if (already) {
-      successMsg.textContent = "⚠️ This number is already registered for this round!";
+      successMsg.textContent = "⚠️ This number is already registered!";
       successMsg.style.color = "red";
       successMsg.classList.remove("hidden");
       setTimeout(() => successMsg.classList.add("hidden"), 2500);
@@ -156,8 +151,7 @@ submitBtn.addEventListener("click", async () => {
     const prefixedName = "💨 " + name;
     await addDoc(collection(db, "contacts3"), { name: prefixedName, phone, time: Date.now() });
 
-    // ✔ Updated emoji + ✔ Updated delay
-    successMsg.textContent = " Contact submitted successfully!";
+    successMsg.textContent = "💨 Contact submitted successfully!";
     successMsg.style.color = "#ffd700";
     successMsg.classList.remove("hidden");
 
@@ -167,7 +161,7 @@ submitBtn.addEventListener("click", async () => {
     setTimeout(() => {
       successMsg.classList.add("hidden");
       openWhatsApp();
-    }, 1000); // 🔥 changed from 1600
+    }, 1000);
 
     updateStats();
   } catch (error) {
@@ -176,19 +170,13 @@ submitBtn.addEventListener("click", async () => {
   }
 });
 
-// Generate and download VCF
+// Generate VCF (GLOBAL – FIXED)
 async function generateVCF(auto = false) {
   try {
     const snapshot = await getDocs(collection(db, "contacts3"));
-    const roundStart = getRoundStart();
 
     const docs = [];
-    snapshot.forEach(d => {
-      const data = d.data();
-      if (data && data.time && Number(data.time) >= roundStart) {
-        docs.push(data);
-      }
-    });
+    snapshot.forEach(d => docs.push(d.data()));
 
     if (docs.length === 0) return;
 
