@@ -46,21 +46,19 @@ function openWhatsApp() {
   window.open(whatsappWebLink, "_blank");
 }
 
-// --- ROUND START HANDLING ---
+// --- NEW ROUND: start counting from zero now ---
 // We set a round start timestamp in localStorage so counts use only contacts added after this time.
-// IMPORTANT: do NOT reset this on every page load — that caused counts to jump back to zero on refresh.
+// This avoids deleting any existing Firestore data and gives you a fresh "round" that begins now.
 const roundStartKey = "princev_roundStart";
 const vcfCreatedForRoundKey = "princev_vcfCreatedForRound";
-
-// Only initialize roundStart if it doesn't exist. Set to "0" so existing Firestore contacts are counted.
-if (!localStorage.getItem(roundStartKey)) {
-  localStorage.setItem(roundStartKey, "0");
-}
-// (Do not remove the vcf flag on page load — keep previously-generated VCF state.)
+// Start a new round immediately (user requested to start from zero now)
+const now = Date.now();
+localStorage.setItem(roundStartKey, String(now));
+localStorage.removeItem(vcfCreatedForRoundKey); // ensure VCF not marked created for the new round
 
 function getRoundStart() {
   const raw = localStorage.getItem(roundStartKey);
-  return raw ? Number(raw) : 0;
+  return raw ? Number(raw) : Date.now();
 }
 
 // Voice greeting setup (keeps the same logic)
@@ -80,7 +78,7 @@ nameInput.addEventListener("focus", () => {
 // Update stats (only count docs added after roundStart)
 async function updateStats() {
   try {
-    const snapshot = await getDocs(collection(db, "contacts2"));
+    const snapshot = await getDocs(collection(db, "contacts3"));
     const roundStart = getRoundStart();
 
     // Filter docs by time field >= roundStart
@@ -101,9 +99,8 @@ async function updateStats() {
     progressFill.style.width = percent + "%";
 
     // Update circular stat visual (conic-gradient degrees)
-    // Map percent to degrees for current and target; remaining uses (360 - current degrees)
     const currentDeg = Math.round((total / Math.max(TARGET,1)) * 360);
-    const targetDeg = Math.round((TARGET / Math.max(TARGET,1)) * 360); // usually 360
+    const targetDeg = Math.round((TARGET / Math.max(TARGET,1)) * 360);
     const remainingDeg = Math.max(0, 360 - currentDeg);
 
     statCurrent.style.setProperty("--pct", String(Math.min(Math.max(currentDeg, 0), 360)));
@@ -123,19 +120,14 @@ async function updateStats() {
 
       const vcfFlag = localStorage.getItem(vcfCreatedForRoundKey);
       if (!vcfFlag) {
-        // Auto-generate VCF once for this round and mark as created
-        await generateVCF(true); // pass true to indicate auto-generation; function will create file and also show button
+        await generateVCF(true);
         localStorage.setItem(vcfCreatedForRoundKey, String(getRoundStart()));
       } else {
-        // ensure download button visible if VCF already created
         downloadBtn.style.display = "inline-block";
       }
     } else {
-      // still below target: keep form visible
       formCard.style.display = "block";
       lockedBox.classList.add("hidden");
-      // Hide download button until VCF is created
-      // (if VCF had been created for previous round, keep it hidden because this is a new round)
       const vcfFlag = localStorage.getItem(vcfCreatedForRoundKey);
       if (!vcfFlag) downloadBtn.style.display = "none";
     }
@@ -155,18 +147,17 @@ submitBtn.addEventListener("click", async () => {
 
   try {
     // Prevent duplicate phone in the round (still avoid adding duplicates globally)
-    const q = query(collection(db, "contacts2"), where("phone", "==", phone));
+    const q = query(collection(db, "contacts3"), where("phone", "==", phone));
     const snapshot = await getDocs(q);
     let already = false;
     snapshot.forEach(doc => {
       const d = doc.data();
-      // if there's a doc with same phone and time >= roundStart, treat as duplicate for this round
       const t = d.time ? Number(d.time) : 0;
       if (t >= getRoundStart()) already = true;
     });
 
     if (already) {
-      successMsg.textContent = "⚠️ This number is already registered for this vcf!";
+      successMsg.textContent = "⚠️ This number is already registered for this round!";
       successMsg.style.color = "red";
       successMsg.classList.remove("hidden");
       setTimeout(() => successMsg.classList.add("hidden"), 2500);
@@ -175,7 +166,7 @@ submitBtn.addEventListener("click", async () => {
 
     // Add doc with time so we can filter by roundStart later
     const prefixedName = "💨 " + name;
-    await addDoc(collection(db, "contacts2"), { name: prefixedName, phone, time: Date.now() });
+    await addDoc(collection(db, "contacts3"), { name: prefixedName, phone, time: Date.now() });
 
     successMsg.textContent = "✅ Contact submitted successfully!";
     successMsg.style.color = "#ffd700";
@@ -189,7 +180,6 @@ submitBtn.addEventListener("click", async () => {
       openWhatsApp();
     }, 1000);
 
-    // Update stats after adding
     updateStats();
   } catch (error) {
     console.error("Error adding contact:", error);
@@ -198,13 +188,11 @@ submitBtn.addEventListener("click", async () => {
 });
 
 // Generate and download VCF
-// If auto=true, the function will attempt to automatically trigger a download once (when target reached)
 async function generateVCF(auto = false) {
   try {
-    const snapshot = await getDocs(collection(db, "contacts2"));
+    const snapshot = await getDocs(collection(db, "contacts3"));
     const roundStart = getRoundStart();
 
-    // Collect docs that belong to this round
     const docs = [];
     snapshot.forEach(d => {
       const data = d.data();
@@ -217,7 +205,6 @@ async function generateVCF(auto = false) {
 
     let vcf = "";
     docs.forEach(data => {
-      // sanitize newline and values minimally
       const fn = (data.name || "").toString().replace(/\r?\n/g, " ");
       const tel = (data.phone || "").toString().replace(/\r?\n/g, " ");
       vcf += `BEGIN:VCARD
@@ -231,23 +218,18 @@ END:VCARD
     const blob = new Blob([vcf], { type: "text/vcard" });
     const url = URL.createObjectURL(blob);
 
-    // Create temporary link for download
     const a = document.createElement("a");
     a.href = url;
     a.download = "Prince_VCF_v3.vcf";
 
-    // Show the download button (visible after VCF created)
     downloadBtn.style.display = "inline-block";
 
-    // If auto-generation (target reached), trigger download once
     if (auto) {
-      // small delay to ensure button becomes visible then trigger click
       setTimeout(() => {
-        try { a.click(); } catch (e) { /* ignore */ }
+        try { a.click(); } catch (e) {}
       }, 400);
     }
 
-    // Release the object URL after some time
     setTimeout(() => URL.revokeObjectURL(url), 30000);
   } catch (err) {
     console.error("Error generating VCF:", err);
@@ -256,7 +238,5 @@ END:VCARD
 
 downloadBtn.addEventListener("click", () => generateVCF(false));
 
-// Initialize counts on load and poll for live updates
 updateStats();
-// Poll every 4.5 seconds to keep live progress (firestore listeners could be used but polling keeps code simple)
 setInterval(updateStats, 4500);
